@@ -1,6 +1,8 @@
 const express = require("express");
 const gravatar = require("gravatar");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const keys = require("../../config/keys");
 
 const router = express.Router();
 
@@ -62,22 +64,34 @@ router.post("/login", (req, res) => {
 
   // Find user by email
   User.findOne({ email }).then(user => {
+    // Check for User
     if (!user) {
       return res.status(400).json({
         message: "Invalid User"
       });
-    } else {
-      // Check password
-      bcrypt.compare(password, user.password).then(isMatch => {
-        if (isMatch) {
-          res.json({
-            message: "Success"
-          });
-        } else {
-          return res.status(400).json({ message: "Invalid User" });
-        }
-      });
     }
+
+    // Check password
+    bcrypt.compare(password, user.password).then(isMatch => {
+      if (isMatch) {
+        // JWT payload
+        const jwtPayload = {
+          id: user.id,
+          name: user.name,
+          avatar: user.avatar
+        };
+
+        // Sign Token
+        jwt.sign(jwtPayload, keys.secret, { expiresIn: 3600 }, (err, token) => {
+          res.json({
+            success: true,
+            token: "Bearer " + token
+          });
+        });
+      } else {
+        return res.status(400).json({ message: "Invalid User" });
+      }
+    });
   });
 });
 
