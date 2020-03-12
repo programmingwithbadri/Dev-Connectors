@@ -25,7 +25,7 @@ router.post("/register", (req, res) => {
   }).then(user => {
     if (user) {
       return res.status(400).json({
-        email: "Email already exists"
+        message: "Email already exists"
       });
     } else {
       const avatar = gravatar.url(req.body.email, {
@@ -49,6 +49,33 @@ router.post("/register", (req, res) => {
             .then(user => res.json(user))
             .catch(err => console.log(err));
         });
+      });
+    }
+  });
+});
+
+// @route  POST api/users/login
+// @desc   Tests Login Users route
+// @access Public
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  // Find user by email
+  User.findOne({ email }).then(user => {
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid User"
+      });
+    } else {
+      // Check password
+      bcrypt.compare(password, user.password).then(isMatch => {
+        if (isMatch) {
+          res.json({
+            message: "Success"
+          });
+        } else {
+          return res.status(400).json({ message: "Invalid User" });
+        }
       });
     }
   });
