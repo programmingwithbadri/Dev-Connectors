@@ -1,6 +1,7 @@
 const express = require("express");
 const passport = require("passport");
 const mongoose = require("mongoose");
+const ValidateProfileInput = require("../../validations/profile");
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.get(
   (req, res) => {
     const errors = {};
     Profile.findOne({ user: req.user.id })
+      .populate("user", ["name", "avatar"])
       .then(profile => {
         if (!profile) {
           errors.profile = "There is no profile for this user";
@@ -37,6 +39,11 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const { errors, isValid } = ValidateProfileInput(req.body);
+
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
     // Get fields
     const profileFields = {};
     profileFields.user = req.user.id;
@@ -57,16 +64,11 @@ router.post(
 
     // Social
     profileFields.social = {};
-    if (req.body.youtube) profileFields.social.youtube = req.body.bio.youtube;
-    if (req.body.facebook)
-      profileFields.social.facebook = req.body.bio.facebook;
-    if (req.body.twitter) profileFields.social.twitter = req.body.bio.twitter;
-    if (req.body.instagram)
-      profileFields.social.instagram = req.body.bio.instagram;
-    if (req.body.linkedin)
-      profileFields.social.linkedin = req.body.bio.linkedin;
-
-    const errors = {};
+    if (req.body.youtube) profileFields.social.youtube = req.body.youtube;
+    if (req.body.facebook) profileFields.social.facebook = req.body.facebook;
+    if (req.body.twitter) profileFields.social.twitter = req.body.twitter;
+    if (req.body.instagram) profileFields.social.instagram = req.body.instagram;
+    if (req.body.linkedin) profileFields.social.linkedin = req.body.linkedin;
 
     Profile.findOne({ user: req.user.id })
       .then(profile => {
@@ -81,7 +83,7 @@ router.post(
           Profile.findOne({ handle: profileFields.handle }).then(profile => {
             if (profile) {
               errors.handle = "That handle already exists";
-              res.sta4(400).json(errors);
+              res.status(400).json(errors);
             }
             // Save Profile
             new Profile(profileFields)
