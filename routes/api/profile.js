@@ -191,6 +191,30 @@ router.post(
   }
 );
 
+// @route  DELETE api/profile/education
+// @desc   Delete education in the user profile
+// @access Private
+router.delete(
+  "/education/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        // Get the education index to remove
+        const removeIndex = profile.education
+          .map(item => item.id)
+          .indexOf(req.params.id);
+
+        // Remove the education
+        profile.education.splice(removeIndex, 1);
+
+        // Save
+        profile.save().then(profile => res.json(profile));
+      })
+      .catch(err => res.status(404).json(err));
+  }
+);
+
 // @route  POST api/profile/experience
 // @desc   Add experience to the user profile
 // @access Private
@@ -220,6 +244,47 @@ router.post(
       profile.experience.unshift(newExp); // Save the experience at beginning of array
 
       profile.save().then(profile => res.json(profile));
+    });
+  }
+);
+
+// @route  DELETE api/profile/experience/:exp_id
+// @desc   Delete experience in the user profile
+// @access Private
+router.delete(
+  "/experience/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOne({ user: req.user.id })
+      .then(profile => {
+        // Get the experience index to remove
+        const removeIndex = profile.experience
+          .map(item => item.id)
+          .indexOf(req.params.id);
+
+        // Remove the experience
+        profile.experience.splice(removeIndex, 1);
+
+        // Save
+        profile.save().then(profile => res.json(profile));
+      })
+      .catch(err => res.status(404).json(err));
+  }
+);
+
+// @route  DELETE api/profile
+// @desc   Delete the user profile
+// @access Private
+router.delete(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+      User.findOneAndRemove({ _id: req.user.id }).then(() =>
+        res.json({
+          success: true
+        })
+      );
     });
   }
 );
