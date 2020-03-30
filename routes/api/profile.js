@@ -1,6 +1,5 @@
 const express = require("express");
 const passport = require("passport");
-const mongoose = require("mongoose");
 
 const ValidateProfileInput = require("../../validations/profile");
 const ValidateExperienceInput = require("../../validations/experience");
