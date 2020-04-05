@@ -3,18 +3,19 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import classnames from "classnames";
 import { Link } from "react-router-dom";
+import { deletePost, addLike, removeLike } from "../../actions/postActions";
 
 class PostItem extends Component {
   onDeleteClick = (id) => {
-    // TODO: Delete Action
+    this.props.deletePost(id);
   };
 
   onLikeClick = (id) => {
-    // TODO: Like Action
+    this.props.addLike(id);
   };
 
   onUnlikeClick = (id) => {
-    // TODO: UnLike Action
+    this.props.removeLike(id);
   };
 
   findUserLike = (likes) => {
@@ -92,6 +93,9 @@ PostItem.defaultProps = {
 };
 
 PostItem.propTypes = {
+  deletePost: PropTypes.func.isRequired,
+  addLike: PropTypes.func.isRequired,
+  removeLike: PropTypes.func.isRequired,
   post: PropTypes.object.isRequired,
   auth: PropTypes.object.isRequired,
 };
@@ -100,4 +104,6 @@ const mapStateToProps = (state) => ({
   auth: state.auth,
 });
 
-export default connect(mapStateToProps)(PostItem);
+export default connect(mapStateToProps, { deletePost, addLike, removeLike })(
+  PostItem
+);
