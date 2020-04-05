@@ -1,7 +1,7 @@
 const Validator = require('validator');
 const isEmpty = require('./is-empty');
 
-module.exports = function validateEducationInput(data) {
+module.exports = function ValidateEducationInput(data) {
   let errors = {};
 
   data.institute = !isEmpty(data.institute) ? data.institute : '';
